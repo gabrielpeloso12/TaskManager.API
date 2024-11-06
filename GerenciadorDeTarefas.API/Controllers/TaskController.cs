@@ -1,6 +1,12 @@
-﻿using GerenciadorDeTarefas.Communication.Request;
+﻿using GerenciadorDeTarefas.Application.UseCases.Tarefa.Delete;
+using GerenciadorDeTarefas.Application.UseCases.Tarefa.GetAll;
+using GerenciadorDeTarefas.Application.UseCases.Tarefa.GetById;
+using GerenciadorDeTarefas.Application.UseCases.Tarefa.Register;
+using GerenciadorDeTarefas.Application.UseCases.Tarefa.Update;
+using GerenciadorDeTarefas.Communication.Request;
 using GerenciadorDeTarefas.Communication.Response;
 using Microsoft.AspNetCore.Mvc;
+using TaskManager.Communication.Response;
 
 namespace GerenciadorDeTarefas.API.Controllers;
 
@@ -11,9 +17,10 @@ public class TaskController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ResponseRegisterTaskJson), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ResponseErrorsTaskJson), StatusCodes.Status400BadRequest)]
-    public IActionResult Create([FromBody] RequestRegisterTaskJson request)
+    public IActionResult Create([FromBody] RequestTaskJson request)
     {
-        return Created();
+        var response = new RegisterTaskUseCase().Execute(request);
+        return Created(string.Empty, response);
     }
 
     [HttpGet]
@@ -21,7 +28,15 @@ public class TaskController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult GetAll()
     {
-        return Ok();
+        var useCase = new GetAllTaskUseCase();
+        var response = useCase.Execute();
+
+        if (response.Tasks.Any())
+        {
+            return Ok(response);
+        }
+
+        return NoContent();
     }
 
     [HttpGet]
@@ -30,15 +45,20 @@ public class TaskController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetById([FromRoute] int id)
     {
-        return Ok();
+
+        var useCase = new GetByIdTaskUseCase();
+        var response = useCase.Execute(id);
+        return Ok(response);
     }
 
     [HttpPut]
     [Route("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ResponseErrorsTaskJson), StatusCodes.Status400BadRequest)]
-    public IActionResult Update([FromRoute] int id, [FromBody] RequestRegisterTaskJson request)
+    public IActionResult Update([FromRoute] int id, [FromBody] RequestTaskJson request)
     {
+        var useCase = new UpdateTaskUseCase();
+        useCase.Execute(id, request);
         return NoContent();
     }
 
@@ -48,6 +68,8 @@ public class TaskController : ControllerBase
     [ProducesResponseType(typeof(ResponseErrorsTaskJson), StatusCodes.Status404NotFound)]
     public IActionResult Delete([FromRoute] int id)
     {
+        var useCase = new DeleteTaskByIdUseCase();
+        useCase.Execute(id);
         return NoContent();
     }
 }

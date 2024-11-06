@@ -2,9 +2,8 @@
 
 namespace GerenciadorDeTarefas.Communication.Request;
 
-public class RequestRegisterTaskJson
+public class RequestTaskJson
 {
-    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description {  get; set; } = string.Empty;
     public PriorityTask Priority { get; set; }
